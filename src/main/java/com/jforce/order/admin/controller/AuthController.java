@@ -2,7 +2,11 @@ package com.jforce.order.admin.controller;
 
 import com.jforce.order.admin.entity.JForceUser;
 import com.jforce.order.admin.service.AuthService;
+import com.jforce.order.exception.user.UsernameAlreadyExistsException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +17,9 @@ import java.util.Optional;
 
 @Controller
 public class AuthController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+    private static final int MIN_PASSWORD_LENGTH = 8;
 
     private final AuthService authService;
 
@@ -33,7 +40,7 @@ public class AuthController {
     @PostMapping("/login")
     public String login(@RequestParam String username,
                         @RequestParam String password,
-                        HttpSession session,
+                        HttpServletRequest request,
                         Model model) {
 
         Optional<JForceUser> user = authService.authenticateUser(username, password);
@@ -43,7 +50,12 @@ public class AuthController {
             return "login";
         }
 
-        session.setAttribute("user", user.get());
+        HttpSession oldSession = request.getSession(false);
+
+        if (oldSession != null) {
+            oldSession.invalidate();
+        }
+        request.getSession(true).setAttribute("user", user.get());
 
         if ("ADMIN".equals(user.get().getRole())) {
             return "redirect:/admin/products";
@@ -64,17 +76,34 @@ public class AuthController {
                            @RequestParam String confirmPassword,
                            Model model) {
 
+        if (username.isBlank()) {
+            model.addAttribute("error", "Username is required");
+            return "register";
+        }
+
+        if (password.length() < MIN_PASSWORD_LENGTH) {
+            model.addAttribute("error", "Password must be at least " + MIN_PASSWORD_LENGTH + " characters");
+            return "register";
+        }
+
         if (!password.equals(confirmPassword)) {
             model.addAttribute("error", "Passwords do not match");
             return "register";
         }
 
-        if (authService.findByUsername(username).isPresent()) {
-            model.addAttribute("error", "Username already exists");
+        try {
+
+            authService.register(username, email, password);
+        } catch (UsernameAlreadyExistsException e) {
+
+            model.addAttribute("error", e.getMessage());
+            return "register";
+        } catch (Exception e) {
+
+            logger.error("Error during registration for username {}: {}", username, e.getMessage());
+            model.addAttribute("error", "An error occurred during registration, please try again later");
             return "register";
         }
-
-        authService.createJForceUser(username, email, password);
 
         return "redirect:/login";
     }

@@ -4,6 +4,8 @@ import com.jforce.order.api.dto.CartResponse;
 import com.jforce.order.api.dto.QuantityRequest;
 import com.jforce.order.user.cart.service.CartService;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/cart")
 public class CartController {
+
+    private static final Logger logger = LoggerFactory.getLogger(CartController.class);
 
     private final CartService cartService;
 
@@ -36,6 +40,8 @@ public class CartController {
                                 @PathVariable Long productId,
                                 @Valid @RequestBody QuantityRequest request) {
 
+        logger.info("Adding item to cart: productId={}, quantity={}", productId, request.quantity());
+
         return cartService.add(user.getUsername(), productId, request.quantity());
     }
 
@@ -44,11 +50,16 @@ public class CartController {
                                    @PathVariable Long productId,
                                    @Valid @RequestBody QuantityRequest request) {
 
+        logger.info("Updating item in cart: productId={}, quantity={}", productId, request.quantity());
+
         return cartService.update(user.getUsername(), productId, request.quantity());
     }
 
     @DeleteMapping("/items/{productId}")
-    public CartResponse removeItem(@AuthenticationPrincipal UserDetails user, @PathVariable Long productId) {
+    public CartResponse removeItem(@AuthenticationPrincipal UserDetails user,
+                                   @PathVariable Long productId) {
+
+        logger.info("Removing item from cart: productId={}", productId);
 
         return cartService.remove(user.getUsername(), productId);
     }

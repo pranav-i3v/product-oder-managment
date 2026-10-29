@@ -9,6 +9,4 @@ public record ProductResponse(
         String description,
         BigDecimal price,
         int quantity,
-        boolean enabled,
-        ZonedDateTime createdAt,
-        ZonedDateTime updatedAt) { }
+        boolean enabled) { }

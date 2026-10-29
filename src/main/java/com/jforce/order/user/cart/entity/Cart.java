@@ -4,6 +4,7 @@ import com.jforce.order.admin.entity.JForceUser;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -23,7 +24,8 @@ public class Cart {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private JForceUser user;
 
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
+    @SQLRestriction("use_ind = 'Y'")
     private List<CartItem> items = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false)

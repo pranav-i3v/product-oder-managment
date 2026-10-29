@@ -1,0 +1,16 @@
+<header>
+    <strong>Product &amp; Order Management</strong>
+    <nav>
+        <span>Hello, <c:out value="${user.username}"/></span>
+
+        <c:if test="${user.role eq 'USER'}">
+            <a href="/products">Products</a>
+            <a href="/cart">Cart</a>
+            <a href="/orders">Orders</a>
+        </c:if>
+
+        <c:if test="${user.role eq 'ADMIN'}"><a href="/admin/products">Manage products</a></c:if>
+
+        <a href="/logout">Sign out</a>
+    </nav>
+</header>

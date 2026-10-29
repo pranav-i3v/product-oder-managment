@@ -9,8 +9,8 @@ import java.time.ZonedDateTime;
 
 @Data
 @Entity
-@Table(schema = "jf", name = "products")
 @NoArgsConstructor
+@Table(schema = "jf", name = "products")
 public class Product {
 
     @Id

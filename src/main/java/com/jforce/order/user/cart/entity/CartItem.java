@@ -10,8 +10,7 @@ import java.time.ZonedDateTime;
 @Data
 @Entity
 @NoArgsConstructor
-@Table(schema = "jf", name = "cart_items",
-        uniqueConstraints = @UniqueConstraint(name = "uk_cart_item_product", columnNames = {"cart_id", "product_id"}))
+@Table(schema = "jf", name = "cart_items")
 public class CartItem {
 
     @Id
@@ -29,6 +28,9 @@ public class CartItem {
     @Column(nullable = false)
     private int quantity;
 
+    @Column(name = "use_ind", nullable = false, length = 1)
+    private String useInd = "Y";
+
     @Column(name = "created_at", nullable = false)
     private ZonedDateTime createdAt;
 
@@ -45,6 +47,10 @@ public class CartItem {
     @PreUpdate
     void onUpdate() {
         updatedAt = ZonedDateTime.now();
+    }
+
+    public boolean isActive() {
+        return "Y".equals(useInd);
     }
 
 }
