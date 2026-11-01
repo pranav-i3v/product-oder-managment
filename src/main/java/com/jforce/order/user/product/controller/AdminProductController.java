@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,31 +27,31 @@ public class AdminProductController {
     }
 
     @GetMapping
-    public List<ProductResponse> listAllProducts() {
-        return productService.listAll();
+    public ResponseEntity<List<ProductResponse>> listAllProducts() {
+        return ResponseEntity.ok(productService.listAll());
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ProductResponse create(@Valid @RequestBody ProductRequest request) {
+    public ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductRequest request) {
 
         logger.info("Creating product {}", request);
-        return productService.create(request);
+        ProductResponse product = productService.create(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(product);
     }
 
     @PutMapping("/{id}")
-    public ProductResponse update(@PathVariable Long id,
-                                  @Valid @RequestBody ProductUpdateRequest request) {
+    public ResponseEntity<ProductResponse> update(@PathVariable Long id,
+                                                @Valid @RequestBody ProductUpdateRequest request) {
 
         logger.info("Updating product {}", request);
-        return productService.update(id, request);
+        return ResponseEntity.ok(productService.update(id, request));
     }
 
     @PatchMapping("/{id}/enabled")
-    public ProductResponse setEnabled(@PathVariable Long id,
-                                      @Valid @RequestBody EnabledRequest request) {
+    public ResponseEntity<ProductResponse> setEnabled(@PathVariable Long id,
+                                                    @Valid @RequestBody EnabledRequest request) {
 
         logger.info("Setting enabled status for product {}", request);
-        return productService.setEnabled(id, request.enabled());
+        return ResponseEntity.ok(productService.setEnabled(id, request.enabled()));
     }
 }
